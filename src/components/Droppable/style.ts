@@ -15,8 +15,9 @@ const Div = styled.div`
   flex-direction: column;
 `;
 
-const Gap = styled.div`
-  flex: 10px;
+const Gap = styled.div<{ isHover: boolean }>`
+  transition: 0.2s height ease;
+  height: ${({ isHover }) => (isHover ? "50px" : "10px")};
 `;
 
 const S = {

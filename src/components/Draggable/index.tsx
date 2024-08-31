@@ -8,30 +8,25 @@ interface DraggableProps extends PropsWithChildren {
 }
 
 export default function Draggable({ id, index, droppableId, children }: DraggableProps) {
-  const [isHidden, setIsHidden] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
     e.dataTransfer.setData("text/plain", id);
     e.dataTransfer.setData("draggedIndex", String(index));
     e.dataTransfer.setData("startId", droppableId);
-    setIsHidden(true);
-  };
-
-  const handleDragOver = () => {
-    // console.log(dataTransfer);
+    setIsDragging(true);
   };
 
   const handleDragEnd = () => {
-    setIsHidden(false);
+    setIsDragging(false);
   };
 
   return (
     <S.Draggable
-      isHidden={isHidden}
+      isHidden={isDragging}
       id={id}
       data-index={index}
       draggable
-      onDragOver={handleDragOver}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
