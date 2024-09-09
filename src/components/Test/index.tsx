@@ -8,17 +8,6 @@ interface Item {
   value: string;
 }
 
-interface DeleteItemProps {
-  draggedIndex: number;
-  setSourceItems: React.Dispatch<React.SetStateAction<Item[]>>;
-}
-
-interface InsertItemProps {
-  draggedItem: Item;
-  targetIndex: number;
-  setTargetItems: React.Dispatch<React.SetStateAction<Item[]>>;
-}
-
 export default function Test() {
   const initialItems1 = [
     { id: 1, value: "Item 1" },
@@ -32,43 +21,63 @@ export default function Test() {
   const [itemsInDroppable1, setItemsInDroppable1] = useState<Item[]>(initialItems1);
   const [itemsInDroppable2, setItemsInDroppable2] = useState<Item[]>(initialItems2);
 
-  const deleteItem = ({ draggedIndex, setSourceItems }: DeleteItemProps) => {
-    setSourceItems((prev) => {
-      const sourceItems = [...prev];
-      sourceItems.splice(draggedIndex, 1);
-      return sourceItems;
-    });
-  };
-
-  const insertItem = ({ draggedItem, targetIndex, setTargetItems }: InsertItemProps) => {
-    setTargetItems((prev) => {
-      const newTargetItems = [...prev];
-      newTargetItems.splice(targetIndex, 0, draggedItem);
-      return newTargetItems;
-    });
-  };
-
   const handleDrop1 = ({ draggedItemId, targetIndex, draggedIndex, startId }: DropFnProps) => {
     if (startId === "droppable1") {
       const draggedItem = itemsInDroppable1.find((item) => String(item.id) === draggedItemId) as Item;
-      deleteItem({ draggedIndex, setSourceItems: setItemsInDroppable1 });
-      insertItem({ draggedItem, targetIndex, setTargetItems: setItemsInDroppable1 });
+      setItemsInDroppable1((prev) => {
+        const items = [...prev];
+        if (targetIndex > draggedIndex) {
+          items.splice(draggedIndex, 1);
+          items.splice(targetIndex - 1, 0, draggedItem);
+        }
+        if (targetIndex < draggedIndex) {
+          items.splice(draggedIndex, 1);
+          items.splice(targetIndex, 0, draggedItem);
+        }
+        return items;
+      });
     } else if (startId === "droppable2") {
       const draggedItem = itemsInDroppable2.find((item) => String(item.id) === draggedItemId) as Item;
-      deleteItem({ draggedIndex, setSourceItems: setItemsInDroppable2 });
-      insertItem({ draggedItem, targetIndex, setTargetItems: setItemsInDroppable1 });
+      setItemsInDroppable2((prev) => {
+        const sourceItems = [...prev];
+        sourceItems.splice(draggedIndex, 1);
+        return sourceItems;
+      });
+      setItemsInDroppable1((prev) => {
+        const newTargetItems = [...prev];
+        newTargetItems.splice(targetIndex, 0, draggedItem);
+        return newTargetItems;
+      });
     }
   };
 
   const handleDrop2 = ({ draggedItemId, targetIndex, draggedIndex, startId }: DropFnProps) => {
     if (startId === "droppable1") {
       const draggedItem = itemsInDroppable1.find((item) => String(item.id) === draggedItemId) as Item;
-      deleteItem({ draggedIndex, setSourceItems: setItemsInDroppable1 });
-      insertItem({ draggedItem, targetIndex, setTargetItems: setItemsInDroppable2 });
+      setItemsInDroppable1((prev) => {
+        const sourceItems = [...prev];
+        sourceItems.splice(draggedIndex, 1);
+        return sourceItems;
+      });
+      setItemsInDroppable2((prev) => {
+        const newTargetItems = [...prev];
+        newTargetItems.splice(targetIndex, 0, draggedItem);
+        return newTargetItems;
+      });
     } else if (startId === "droppable2") {
       const draggedItem = itemsInDroppable2.find((item) => String(item.id) === draggedItemId) as Item;
-      deleteItem({ draggedIndex, setSourceItems: setItemsInDroppable2 });
-      insertItem({ draggedItem, targetIndex, setTargetItems: setItemsInDroppable2 });
+      setItemsInDroppable2((prev) => {
+        const items = [...prev];
+        if (targetIndex > draggedIndex) {
+          items.splice(draggedIndex, 1);
+          items.splice(targetIndex - 1, 0, draggedItem);
+        }
+        if (targetIndex < draggedIndex) {
+          items.splice(draggedIndex, 1);
+          items.splice(targetIndex, 0, draggedItem);
+        }
+        return items;
+      });
     }
   };
 
