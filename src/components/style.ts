@@ -9,12 +9,18 @@ const DraggableWrapper = styled.div<{ isDragging: boolean }>`
     transform 0.3s ease;
 `;
 
-const DroppableWrapper = styled.div<{ droppableId: string }>`
-  min-height: 100px;
+const DroppableWrapper = styled.div`
+  min-height: 10px;
+  height: fit-content;
   min-width: 100px;
   border: 2px dashed #ddd;
   padding: 10px;
   position: relative;
+
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 `;
 
 const S = {

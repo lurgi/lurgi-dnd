@@ -1,8 +1,15 @@
-import { Children, PropsWithChildren, ReactNode, useEffect } from "react";
-import { useDragDropStore } from "../hooks/useDragDropStore";
-import type { CustomDragEvent } from "../hooks/useDragDropStore";
+import { Children, cloneElement, isValidElement, PropsWithChildren, ReactNode, useEffect } from "react";
+import { CustomDragEvent, useDragDropStore } from "../hooks/useDragDropStore";
 import S from "./style";
 import { DraggableProps } from "./Draggable";
+
+export type CustomDragEventForUser = {
+  currentDraggable?: { id: string | number; index: number };
+  targetDraggable?: { id: string | number; index: number };
+
+  currentDroppable?: { id: string | number; index: number };
+  targetDroppable?: { id: string | number; index: number };
+};
 
 export interface DropFnProps {
   sourceDroppableId: string | number;
@@ -18,69 +25,82 @@ export interface DropFnProps {
 }
 
 export interface DroppableProps extends PropsWithChildren {
-  onDrop: (props: CustomDragEvent) => void;
-  droppableId: string;
+  onDrop: (props: CustomDragEventForUser) => void;
+  droppableId: string | number;
+  droppableIndex: number;
 }
 
-const Droppable = ({ children, onDrop, droppableId }: DroppableProps) => {
-  const Draggables = Children.toArray(children) as (ReactNode & DraggableProps)[];
+const transformDragEvent = (event: CustomDragEvent): CustomDragEventForUser => {
+  const { currentDraggable, targetDraggable, currentDroppable, targetDroppable } = event;
+
+  return {
+    currentDraggable,
+    targetDraggable,
+    currentDroppable,
+    targetDroppable,
+  };
+};
+
+const Droppable = ({ children, onDrop, droppableId, droppableIndex }: DroppableProps) => {
+  const draggables = Children.toArray(children) as (ReactNode & DraggableProps)[];
 
   const {
     dragEvent,
     startDrag,
+    droppables,
     endDrag,
     pushDroppable,
-    findDroppableIndex,
     clearCurrentDroppable,
     setCurrentDroppable,
+    setTempDroppable,
     setTargetDroppable,
     clearTargetDroppable,
+    clearTempDroppable,
+    resetDroppable,
+    moveDraggable,
+    setTargetDraggable,
   } = useDragDropStore();
 
   useEffect(() => {
-    const draggables = Draggables.map((Draggable) => ({ id: Draggable.id, droppableId }));
     pushDroppable({ id: droppableId, draggables });
   }, []);
 
   const handleMouseUp = () => {
     endDrag();
-    onDrop(dragEvent);
+    onDrop(transformDragEvent(dragEvent));
+    resetDroppable();
+
     clearCurrentDroppable();
+    clearTempDroppable();
     clearTargetDroppable();
   };
 
   const handleMouseDown = () => {
     startDrag();
 
-    if (dragEvent.isDragging) {
-      const droppableIndex = findDroppableIndex(droppableId);
-      setCurrentDroppable({ droppableIndex, droppableId });
-      setTargetDroppable({ droppableIndex, droppableId });
-    }
+    setCurrentDroppable({ droppableIndex, droppableId });
+    setTempDroppable({ droppableIndex, droppableId });
+    setTargetDroppable({ droppableIndex, droppableId });
   };
 
   const handleMouseEnter = () => {
     if (dragEvent.isDragging) {
-      const droppableIndex = findDroppableIndex(droppableId);
       setTargetDroppable({ droppableIndex, droppableId });
     }
-  };
-
-  const handleMouseLeave = () => {
-    if (dragEvent.isDragging) {
-      clearCurrentDroppable();
+    if (dragEvent.isDragging && !droppables[droppableIndex]?.draggables.length) {
+      setTargetDraggable({ id: "empty", index: 0 });
+      moveDraggable();
     }
   };
 
   return (
-    <S.DroppableWrapper
-      onMouseEnter={handleMouseEnter}
-      onMouseUp={handleMouseUp}
-      onMouseDown={handleMouseDown}
-      onMouseLeave={handleMouseLeave}
-      droppableId={droppableId}
-    >
-      {children}
+    <S.DroppableWrapper onMouseEnter={handleMouseEnter} onMouseUp={handleMouseUp} onMouseDown={handleMouseDown}>
+      {droppables[droppableIndex]?.draggables.map((draggable, index) => {
+        if (isValidElement(draggable)) {
+          return cloneElement(draggable, { index });
+        }
+        return null;
+      })}
     </S.DroppableWrapper>
   );
 };

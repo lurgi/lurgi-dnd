@@ -1,6 +1,7 @@
-import { MouseEvent, PropsWithChildren, useCallback, useEffect, useRef, useState } from "react";
+import { PropsWithChildren, useEffect, useRef, useState } from "react";
 import S from "./style";
 import { useDragDropStore } from "../hooks/useDragDropStore";
+import { useCursor } from "../hooks/useCursor";
 
 export interface DraggableProps extends PropsWithChildren {
   id: string;
@@ -8,69 +9,59 @@ export interface DraggableProps extends PropsWithChildren {
 }
 
 const Draggable = ({ id, index, children }: DraggableProps) => {
-  const { setCurrentDraggable, clearCurrentDraggable, setTargetDraggableIndex, clearTargetDraggableIndex } =
-    useDragDropStore();
-  const [isDragging, setIsDragging] = useState(false);
-  const [draggingClone, setDraggingClone] = useState<HTMLElement | null>(null);
+  const {
+    dragEvent,
+    moveDraggable,
+    setCurrentDraggable,
+    clearCurrentDraggable,
+    setTempDraggable,
+    clearTempDraggable,
+    setTargetDraggable,
+    clearTargetDraggable,
+  } = useDragDropStore();
+  const [isDragging, setIsDragging] = useState(dragEvent.isDragging);
+  const { renderCursor, deleteCursor } = useCursor();
   const ref = useRef<HTMLDivElement>(null);
 
-  const handleMouseDown = (e: MouseEvent<HTMLElement>) => {
-    setCurrentDraggable({ draggableId: id, draggableIndex: index });
+  const handleMouseUp = () => {
+    clearTempDraggable();
+    clearCurrentDraggable();
+    clearTargetDraggable();
+    setIsDragging(false);
+
+    if (deleteCursor) deleteCursor();
+  };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setCurrentDraggable({ id, index });
+    setTempDraggable({ id, index });
+    setTargetDraggable({ id, index });
     setIsDragging(true);
 
     if (ref.current) {
-      const clone = ref.current.cloneNode(true) as HTMLElement;
-      clone.style.position = "fixed";
-      clone.style.pointerEvents = "none";
-      clone.style.left = `${e.clientX}px`;
-      clone.style.top = `${e.clientY}px`;
-      clone.style.width = `${ref.current.offsetWidth}px`;
-      clone.style.height = `${ref.current.offsetHeight}px`;
-      document.body.appendChild(clone);
-      setDraggingClone(clone);
+      const cursorElement = ref.current.cloneNode(true) as HTMLDivElement;
+      cursorElement!.style.left = `${e.clientX}px`;
+      cursorElement!.style.top = `${e.clientY}px`;
+      renderCursor(cursorElement, handleMouseUp);
     }
   };
 
-  const handleMouseMove = useCallback(
-    (e: globalThis.MouseEvent) => {
-      if (isDragging && draggingClone) {
-        draggingClone.style.left = `${e.clientX}px`;
-        draggingClone.style.top = `${e.clientY}px`;
-      }
-    },
-    [draggingClone, isDragging]
-  );
-
-  const handleMouseUp = useCallback(() => {
-    clearCurrentDraggable();
-    setIsDragging(false);
-    if (draggingClone) {
-      document.body.removeChild(draggingClone);
-      setDraggingClone(null);
-    }
-  }, [draggingClone]);
-
-  useEffect(() => {
-    if (isDragging) {
-      window.addEventListener("mousemove", handleMouseMove);
-      window.addEventListener("mouseup", handleMouseUp);
-    } else {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-    }
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, [isDragging, handleMouseMove, handleMouseUp]);
-
   const handleMouseEnter = () => {
-    setTargetDraggableIndex(index);
+    if (dragEvent.isDragging) {
+      setTargetDraggable({ id, index });
+      moveDraggable();
+    }
   };
 
   const handleMouseLeave = () => {
-    clearTargetDraggableIndex();
+    clearTargetDraggable();
   };
+
+  useEffect(() => {
+    if (!dragEvent.isDragging) {
+      setIsDragging(false);
+    }
+  }, [dragEvent.isDragging]);
 
   return (
     <S.DraggableWrapper
