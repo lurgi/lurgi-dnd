@@ -11,23 +11,13 @@ export type CustomDragEventForUser = {
   targetDroppable?: { id: string | number; index: number };
 };
 
-export interface DropFnProps {
-  sourceDroppableId: string | number;
-  sourceDroppableIndex: number;
-
-  targetDroppableId: string | number;
-  targetDroppableIndex: number;
-
-  draggableId: string | number;
-  draggableIndex: number;
-
-  targetDraggableIndex: number;
-}
-
 export interface DroppableProps extends PropsWithChildren {
   onDrop: (props: CustomDragEventForUser) => void;
   droppableId: string | number;
   droppableIndex: number;
+
+  minWidth?: number;
+  minHeight?: number;
 }
 
 const transformDragEvent = (event: CustomDragEvent): CustomDragEventForUser => {
@@ -41,7 +31,7 @@ const transformDragEvent = (event: CustomDragEvent): CustomDragEventForUser => {
   };
 };
 
-const Droppable = ({ children, onDrop, droppableId, droppableIndex }: DroppableProps) => {
+const Droppable = ({ children, onDrop, droppableId, droppableIndex, minWidth, minHeight }: DroppableProps) => {
   const draggables = Children.toArray(children) as (ReactNode & DraggableProps)[];
 
   const {
@@ -94,7 +84,13 @@ const Droppable = ({ children, onDrop, droppableId, droppableIndex }: DroppableP
   };
 
   return (
-    <S.DroppableWrapper onMouseEnter={handleMouseEnter} onMouseUp={handleMouseUp} onMouseDown={handleMouseDown}>
+    <S.DroppableWrapper
+      minWidth={minWidth}
+      minHeight={minHeight}
+      onMouseEnter={handleMouseEnter}
+      onMouseUp={handleMouseUp}
+      onMouseDown={handleMouseDown}
+    >
       {droppables[droppableIndex]?.draggables.map((draggable, index) => {
         if (isValidElement(draggable)) {
           return cloneElement(draggable, { index });
