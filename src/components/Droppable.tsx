@@ -46,19 +46,25 @@ const Droppable = ({ children, onDrop, droppableId, droppableIndex, minWidth, mi
     setTargetDroppable,
     clearTargetDroppable,
     clearTempDroppable,
-    resetDroppable,
     moveDraggable,
     setTargetDraggable,
+    resetFailDroppable,
+    resetSuccessDroppable,
   } = useDragDropStore();
 
   useEffect(() => {
     pushDroppable({ id: droppableId, draggables });
-  }, []);
+  }, [children]);
 
   const handleMouseUp = () => {
+    const DragEvent = transformDragEvent(dragEvent);
     endDrag();
-    onDrop(transformDragEvent(dragEvent));
-    resetDroppable();
+    onDrop(DragEvent);
+
+    const { targetDraggable, targetDroppable, currentDraggable, currentDroppable } = DragEvent;
+    if (targetDraggable && targetDroppable && currentDraggable && currentDroppable) {
+      resetSuccessDroppable();
+    } else resetFailDroppable();
 
     clearCurrentDroppable();
     clearTempDroppable();

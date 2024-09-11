@@ -47,7 +47,8 @@ type DragDropState = {
   pushDroppable: (droppable: Droppable) => void;
   addDraggable: (props: { droppableId: number | string; draggable: Draggable }) => void;
   moveDraggable: () => void;
-  resetDroppable: () => void;
+  resetFailDroppable: () => void;
+  resetSuccessDroppable: () => void;
 };
 
 export const useDragDropStore = create<DragDropState>((set, get) => ({
@@ -286,10 +287,14 @@ export const useDragDropStore = create<DragDropState>((set, get) => ({
     }
   },
 
-  resetDroppable: () => {
+  resetFailDroppable: () => {
     const state = get();
     const initialDroppables = state.initialDroppables;
 
     set({ droppables: initialDroppables });
+  },
+
+  resetSuccessDroppable: () => {
+    set({ droppables: [], initialDroppables: [] });
   },
 }));
