@@ -1,7 +1,8 @@
-import { PropsWithChildren, useEffect, useRef, useState } from "react";
+import { PropsWithChildren, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import S from "./style";
 import { useDragDropStore } from "../hooks/useDragDropStore";
 import { useCursor } from "../hooks/useCursor";
+import DraggableRectClosure from "./DraggableRectClosure";
 
 export interface DraggableProps extends PropsWithChildren {
   id: string;
@@ -21,6 +22,7 @@ const Draggable = ({ id, index, children }: DraggableProps) => {
   } = useDragDropStore();
   const [isDragging, setIsDragging] = useState(dragEvent.isDragging);
   const { renderCursor, deleteCursor } = useCursor();
+  const draggableId = useId();
   const ref = useRef<HTMLDivElement>(null);
 
   const handleMouseUp = () => {
@@ -62,6 +64,29 @@ const Draggable = ({ id, index, children }: DraggableProps) => {
       setIsDragging(false);
     }
   }, [dragEvent.isDragging]);
+
+  useLayoutEffect(() => {
+    const curRect = ref.current?.getBoundingClientRect();
+    const prevRect = DraggableRectClosure.getRect(draggableId);
+
+    if (ref.current && prevRect?.left && prevRect.top && curRect) {
+      const deltaX = prevRect.left - curRect.left;
+      const deltaY = prevRect.top - curRect.top;
+
+      if (!!deltaX || !!deltaY) {
+        const element = ref.current;
+        element.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+        element.style.transition = "";
+
+        requestAnimationFrame(() => {
+          element.style.transform = `translate(0px, 0px)`;
+          element.style.transition = "transform 0.3s ease";
+        });
+      }
+    }
+
+    DraggableRectClosure.setRect(draggableId, { left: curRect?.left, top: curRect?.top });
+  }, [index, draggableId]);
 
   return (
     <S.DraggableWrapper

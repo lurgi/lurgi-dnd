@@ -4,9 +4,7 @@ const DraggableWrapper = styled.div<{ isDragging: boolean }>`
   position: relative;
   opacity: ${({ isDragging }) => (isDragging ? 0.2 : 1)};
   cursor: grab;
-  transition:
-    opacity 0.2s ease,
-    transform 0.3s ease;
+  transition: opacity 0.2s ease;
 `;
 
 const DroppableWrapper = styled.div<{ minHeight?: number; minWidth?: number }>`
