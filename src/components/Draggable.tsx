@@ -80,12 +80,20 @@ const Draggable = ({ id, index, children }: DraggableProps) => {
 
         requestAnimationFrame(() => {
           element.style.transform = `translate(0px, 0px)`;
-          element.style.transition = "transform 0.3s ease";
+          element.style.transition = "transform 0.2s ease-in-out";
         });
       }
     }
 
     DraggableRectClosure.setRect(draggableId, { left: curRect?.left, top: curRect?.top });
+
+    return () => {
+      if (ref.current) {
+        const element = ref.current;
+        element.style.transform = ``;
+        element.style.transition = "";
+      }
+    };
   }, [index, draggableId]);
 
   return (
