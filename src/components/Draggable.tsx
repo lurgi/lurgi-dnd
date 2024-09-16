@@ -80,7 +80,7 @@ const Draggable = ({ id, index, children }: DraggableProps) => {
 
         requestAnimationFrame(() => {
           element.style.transform = `translate(0px, 0px)`;
-          element.style.transition = "transform 0.2s ease-in-out";
+          element.style.transition = "transform 0.2s ease";
         });
       }
     }
