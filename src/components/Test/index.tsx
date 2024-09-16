@@ -1,7 +1,7 @@
 import { useState } from "react";
-import Draggable from "../Draggable";
-import Droppable, { CustomDragEventForUser } from "../Droppable";
+
 import S from "./style";
+import { CustomDragEventForUser, Draggable, Droppable } from "lurgi-dnd";
 
 interface Item {
   id: number;
