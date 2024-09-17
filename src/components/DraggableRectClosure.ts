@@ -4,7 +4,7 @@ interface RectObj {
 }
 
 const DraggableRectClosure = (() => {
-  const rectMap = new Map();
+  const rectMap = new Map<string, RectObj>();
 
   const setRect = (id: string, { left, top }: RectObj) => {
     rectMap.set(id, { left, top });

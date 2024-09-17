@@ -54,7 +54,7 @@ const Droppable = ({ children, onDrop, droppableId, droppableIndex, minWidth, mi
 
   useEffect(() => {
     pushDroppable({ id: droppableId, draggables });
-  }, [children]);
+  }, []);
 
   const handleMouseUp = () => {
     const DragEvent = transformDragEvent(dragEvent);

@@ -20,6 +20,7 @@ const Draggable = ({ id, index, children }: DraggableProps) => {
     setTargetDraggable,
     clearTargetDraggable,
   } = useDragDropStore();
+
   const [isDragging, setIsDragging] = useState(dragEvent.isDragging);
   const { renderCursor, deleteCursor } = useCursor();
   const draggableId = useId();
