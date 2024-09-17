@@ -43,8 +43,7 @@ const Draggable = ({ id, index, children }: DraggableProps) => {
 
     if (ref.current) {
       const cursorElement = ref.current.cloneNode(true) as HTMLDivElement;
-      cursorElement!.style.left = `${e.clientX}px`;
-      cursorElement!.style.top = `${e.clientY}px`;
+      cursorElement.style.transform = `translate(${e.clientX}px ${e.clientY}px`;
       renderCursor(cursorElement, handleMouseUp);
     }
   };

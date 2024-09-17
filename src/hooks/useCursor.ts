@@ -15,11 +15,11 @@ export const useCursor = create<CursorState>((set, get) => ({
     Element.style.position = "fixed";
     Element.style.pointerEvents = "none";
     Element.style.zIndex = "9999";
+
     document.body.appendChild(Element);
 
     const handleMouseMove = (e: MouseEvent) => {
-      Element!.style.left = `${e.clientX}px`;
-      Element!.style.top = `${e.clientY}px`;
+      Element.style.transform = `translate(${e.clientX}px ${e.clientY}px`;
     };
 
     document.addEventListener("mousemove", handleMouseMove);
